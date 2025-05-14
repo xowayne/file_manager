@@ -1,27 +1,26 @@
 import json
 
-#this creates the expense. Example: grocery, $10, fruits
 class Expense:
     
     def __init__(self, category, amount, description):
         self.category = category
         self.amount = amount
         self.description = description
-#This translates the code for human understanding
+
     def __str__(self):
         return f"{self.category}: ${self.amount} - {self.description}"
 
-#Manages expense entries, file storage, and user interaction.
+
 class ExpenseTracker:
     
     def __init__(self, filename="expenses.json"):
         self.filename = filename
         self.expenses = self.load_expenses()
 
-#adds and saves expense like a notebook.
+
     def add_expense(self, category, amount, description):
         try:
-            amount = float(amount)  # Ensure the amount is a number
+            amount = float(amount)  
             expense = Expense(category, amount, description)
             self.expenses.append(expense)
             self.save_expenses()
@@ -29,7 +28,7 @@ class ExpenseTracker:
         except ValueError:
             print("Invalid amount. Please enter a valid number.")
 
-#Displays all expenses.
+
     def view_expenses(self):
         if not self.expenses:
             print("No expenses recorded.")
@@ -37,20 +36,22 @@ class ExpenseTracker:
             for idx, exp in enumerate(self.expenses, 1):
                 print(f"{idx}. {exp}")
 
-#Saves expenses to a JSON file.
+
     def save_expenses(self):
         with open(self.filename, "w") as file:
             json.dump([exp.__dict__ for exp in self.expenses], file, indent=4)
 
-#Loads expenses from a JSON file
+
     def load_expenses(self):
         try:
             with open(self.filename, "r") as file:
                 data = json.load(file)
+                print("Loaded expenses from file.")  # Debugging line
                 return [Expense(**entry) for entry in data]
-        except (FileNotFoundError, json.JSONDecodeError):
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"Could not load expenses: {e}")  # Show error
             return []
-#creates display menu
+
 def main():
     tracker = ExpenseTracker()
     
