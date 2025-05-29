@@ -1,14 +1,15 @@
 import json
+from datetime import datetime
 
 class Expense:
-    
-    def __init__(self, category, amount, description):
+    def __init__(self, category, amount, description, timestamp=None):
         self.category = category
         self.amount = amount
         self.description = description
+        self.timestamp = timestamp or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def __str__(self):
-        return f"{self.category}: ${self.amount} - {self.description}"
+        return f"{self.category}: ${self.amount} - {self.description} [{self.timestamp}] "
 
 
 class ExpenseTracker:
@@ -28,6 +29,18 @@ class ExpenseTracker:
         except ValueError:
             print("Invalid amount. Please enter a valid number.")
 
+    def delete_expense(self, index):
+        try:
+            index = int(index) - 1
+            if 0 <= index < len(self.expenses):
+                removed = self.expenses.pop(index)
+                self.save_expenses()
+                print(f"Deleted: {removed}")
+            else:
+                print("Invalid index. Please choose a valid expense number.")
+        except ValueError:
+            print("Please enter a valid number.")
+
 
     def view_expenses(self):
         if not self.expenses:
@@ -35,7 +48,8 @@ class ExpenseTracker:
         else:
             for idx, exp in enumerate(self.expenses, 1):
                 print(f"{idx}. {exp}")
-
+            total = sum(exp.amount for exp in self.expenses)
+            print(f"\nTotal Expenses: ${total:.2f}")
 
     def save_expenses(self):
         with open(self.filename, "w") as file:
@@ -46,10 +60,10 @@ class ExpenseTracker:
         try:
             with open(self.filename, "r") as file:
                 data = json.load(file)
-                print("Loaded expenses from file.")  # Debugging line
+                print("Loaded expenses from file.")  
                 return [Expense(**entry) for entry in data]
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"Could not load expenses: {e}")  # Show error
+            print(f"Could not load expenses: {e}")  
             return []
 
 def main():
@@ -59,7 +73,8 @@ def main():
         print("\nExpense Tracker Menu:")
         print("1. Add Expense")
         print("2. View Expenses")
-        print("3. Exit")
+        print("3. Delete Expense")
+        print("4. Exit")
         
         choice = input("Choose an option: ")
         
@@ -73,6 +88,11 @@ def main():
             tracker.view_expenses()
         
         elif choice == "3":
+            tracker.view_expenses()
+            idx = input("Enter the number of the expense to delete: ")
+            tracker.delete_expense(idx)
+
+        elif choice == "4":
             print("Exiting. Your expenses are saved.")
             break
         
